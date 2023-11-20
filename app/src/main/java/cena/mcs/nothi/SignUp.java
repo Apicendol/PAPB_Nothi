@@ -24,7 +24,6 @@ public class SignUp extends AppCompatActivity {
 
     FirebaseAuth auth;
     FirebaseDatabase database;
-    DatabaseReference _user;
     EditText _txtEmail, _txtUsername, _txtPassword;
 
     @Override
@@ -34,7 +33,6 @@ public class SignUp extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
-        _user = database.getReference("Users");
 
         _txtEmail = findViewById(R.id.etEmail);
         _txtUsername = findViewById(R.id.etUser);
@@ -44,6 +42,7 @@ public class SignUp extends AppCompatActivity {
         Button _Register = this.findViewById(R.id.btCreate);
 
         _back.setOnClickListener(v -> {
+            startActivity(new Intent(this, Welcome.class));
             finish();
         });
 
@@ -56,47 +55,25 @@ public class SignUp extends AppCompatActivity {
             String email = _txtEmail.getText().toString();
             String username = _txtUsername.getText().toString();
             String pass = _txtPassword.getText().toString();
-
-            RegisterUser(email, username, pass);
+            createAccountInFirebase(email, pass);
         });
     }
 
-    private void RegisterUser(String email, String username, String pass) {
-        auth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    Users users = new Users();
-                    users.setName(_txtUsername.getText().toString());
-                    users.setEmail(_txtEmail.getText().toString());
-                    users.setPassword(_txtPassword.getText().toString());
-
-                    _user.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(users)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    FirebaseUser user = auth.getCurrentUser();
-                                    user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            Toast.makeText(SignUp.this, "Email verifikasi dikirim ke " + email, Toast.LENGTH_LONG).show();
-                                            Intent regis = new Intent(getApplicationContext(), HomePage.class);
-                                            String _email = _txtEmail.getText().toString();
-                                            regis.putExtra("email", _email);
-                                            setResult(RESULT_OK, regis);
-                                            startActivity(regis);
-                                            finish();
-                                        }
-                                    });
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(SignUp.this, "Registrasi Gagal" + e.getMessage(), Toast.LENGTH_LONG).show();
-                                }
-                            });
+    private void createAccountInFirebase(String email, String pass) {
+        auth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(SignUp.this,
+                new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            Toast.makeText(SignUp.this, "Email verifikasi dikirim ke " + email, Toast.LENGTH_LONG).show();
+                            auth.getCurrentUser().sendEmailVerification();
+                            auth.signOut();
+                            finish();
+                        }else{
+                            Toast.makeText(SignUp.this, "Registrasi Gagal", Toast.LENGTH_LONG).show();
+                        }
+                    }
                 }
-            }
-        });
+        );
     }
 }

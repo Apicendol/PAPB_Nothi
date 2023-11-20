@@ -1,5 +1,7 @@
 package cena.mcs.nothi;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -7,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -54,7 +57,6 @@ public class Welcome extends AppCompatActivity {
         _btnGooogle.setOnClickListener(v -> {
             Intent google = googleSignInClient.getSignInIntent();
             startActivityForResult(google, RC_SIGN_IN);
-//            this.startActivity(regist);
         });
 
         _btnCreateAcc.setOnClickListener(v -> {
@@ -90,16 +92,9 @@ public class Welcome extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            FirebaseUser user = auth.getCurrentUser();
-                            Users users = new Users();
-                            users.setUserId(users.getUserId());
-                            users.setName(users.getName());
-                            users.setProfile(users.getProfile().toString());
-
-                            database.getReference().child("Users").child(users.getUserId()).setValue(users);
-
-                            Intent home = new Intent(Welcome.this, HomePage.class);
-                            startActivity(home);
+                            Log.d(TAG, "signInWithCredential:success");
+                            Toast.makeText(Welcome.this, "Success", Toast.LENGTH_LONG).show();
+                            startActivity(new Intent(Welcome.this, HomePage.class));
                         } else {
                             Toast.makeText(Welcome.this, "Error", Toast.LENGTH_LONG).show();
                         }

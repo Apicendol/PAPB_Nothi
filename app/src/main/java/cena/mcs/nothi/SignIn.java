@@ -48,6 +48,7 @@ public class SignIn extends AppCompatActivity {
         Button _signIn = this.findViewById(R.id.btSave);
 
         _back.setOnClickListener(v -> {
+            startActivity(new Intent(this, Welcome.class));
             finish();
         });
 
@@ -57,37 +58,20 @@ public class SignIn extends AppCompatActivity {
             Login(email, pass);
         });
     }
+
     private void Login(String email, String pass) {
         auth.signInWithEmailAndPassword(email, pass)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            FirebaseDatabase.getInstance().getReference("Users")
-                                    .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            FirebaseUser user = auth.getCurrentUser();
-                                            if (user != null) {
-                                                if (user.isEmailVerified()) {
-//                                                    Model.current = dataSnapshot.getValue(Users.class);
-                                                    Intent home = new Intent(SignIn.this, HomePage.class);
-                                                    home.putExtra("email", _txtEmail.getText().toString());
-                                                    startActivity(home);
-                                                    Toast.makeText(SignIn.this, "Login Berhasil", Toast.LENGTH_SHORT).show();
-                                                } else {
-                                                    Toast.makeText(SignIn.this, "Not verified", Toast.LENGTH_LONG).show();
-                                                }
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                                        }
-                                    });
+                            if (auth.getCurrentUser().isEmailVerified()) {
+                                startActivity(new Intent(SignIn.this, HomePage.class));
+                                finish();
+                            } else {
+                                Toast.makeText(SignIn.this, "Email Not Verified", Toast.LENGTH_LONG).show();
+                            }
                         } else {
-                            Toast.makeText(SignIn.this, "Login Gagal", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignIn.this, "Login Failed", Toast.LENGTH_LONG).show();
                         }
                     }
                 });

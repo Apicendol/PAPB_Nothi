@@ -14,10 +14,7 @@
         android:theme="@style/Theme.Nothi"
         tools:targetApi="31">
         <activity
-            android:name=".AddNewTask"
-            android:exported="false" />
-        <activity
-            android:name=".Notes"
+            android:name=".NoteDetails"
             android:exported="false" />
         <activity
             android:name=".HomePage"
